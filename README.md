@@ -1,0 +1,1 @@
+I am using Advent of Code to try to teach myself Python; I'm revisiting last year (2019) after stopping six days in. At this time I've completed days 1-2 and 4-6, but I seem to have misplaced the solution for day 6.
