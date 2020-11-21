@@ -1,11 +1,11 @@
-def get_arg(index, pos):
-    mode = (program[index] // (10 ** (pos + 1))) % 10
-    if mode == 0:
-        return program[program[index+pos]]
-    elif mode == 1:
-        return program[index+pos]
-
 def intcode(program):
+    def get_arg(index, pos):
+        mode = (program[index] // (10 ** (pos + 1))) % 10
+        if mode == 0:
+            return program[program[index+pos]]
+        elif mode == 1:
+            return program[index+pos]
+
     index = 0
     while program[index] != 99:
         op = program[index] % 100
