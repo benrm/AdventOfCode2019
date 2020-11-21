@@ -1,4 +1,33 @@
+import queue
+import threading
+
 def intcode(program):
+    in_queue = queue.Queue()
+    out_queue = queue.Queue()
+
+    t = threading.Thread(target=base_intcode, args=(program, in_queue, out_queue))
+    t.start()
+
+    running = True
+    while running:
+        msg = out_queue.get()
+        if msg["action"] == "exit":
+            running = False
+            t.join()
+        elif msg["action"] == "error":
+            running = False
+            print(str(msg["error"]))
+            t.join()
+        elif msg["action"] == "request":
+            msg["action"] = "response"
+            msg["value"] = input("Enter an integer value: ")
+            in_queue.put(msg)
+        elif msg["action"] == "output":
+            print(str(msg["value"]))
+        else:
+            print("Unknown action: " + msg["action"])
+
+def base_intcode(program, in_queue, out_queue):
     def get_arg(index, pos):
         mode = (program[index] // (10 ** (pos + 1))) % 10
         if mode == 0:
@@ -31,10 +60,14 @@ def intcode(program):
             index += 4
         elif op == 3 or op ==4:
             if op == 3:
-                program[program[index+1]] = input("Provide an integer: ")
+                msg = {"action": "request"}
+                out_queue.put(msg)
+                obj = in_queue.get()
+                program[program[index+1]] = obj["value"]
             elif op == 4:
                 arg1 = get_arg(index, 1)
-                print(str(arg1))
+                msg = {"action": "output", "value": arg1}
+                out_queue.put(msg)
             index += 2
         elif op == 5 or op == 6:
             arg1 = get_arg(index, 1)
@@ -50,7 +83,12 @@ def intcode(program):
                 else:
                     index += 3
         elif op == 99:
+            msg = {"action": "exit"}
+            out_queue.put(msg)
             break
         else:
-            print("Unknown opcode")
+            msg = {"action": "error", error: "Unknown opcode"}
+            out_queue.put(msg)
             break
+    msg = {"action": "exit"}
+    out_queue.put(msg)
