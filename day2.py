@@ -1,15 +1,19 @@
+#!/usr/bin/python
+
+import argparse
 import string
 import sys
 
+parser = argparse.ArgumentParser("Parse optional file inputs")
+parser.add_argument("-i", "--input", nargs="?", type=argparse.FileType("r"), default=sys.stdin)
+args = parser.parse_args()
+
 sep = ','
-program = [int(s) for s in sys.stdin.read().split(sep)]
+program = [int(s) for s in args.input.read().split(sep)]
 
 if len(program) < 4:
     print("Program is too short.")
     exit(1)
-
-program[1] = 12
-program[2] = 2
 
 index = 0
 while program[index] != 99:
