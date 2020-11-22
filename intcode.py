@@ -95,7 +95,7 @@ def base_intcode(program, in_queue, out_queue):
         else:
             msg = {"action": "error", "error": "Unknown opcode"}
             out_queue.put(msg)
-            break
+            running = False
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Parse optional file inputs")
