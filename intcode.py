@@ -36,16 +36,42 @@ class UnknownOpcode(Exception):
     def __init__(self, opcode):
         self.opcode = opcode
 
+class UnknownMode(Exception):
+    def __init__(self, mode):
+        self.mode = mode
+
+class UnboundedList(list):
+    def __init__(self, data):
+        self.data = data
+    def _access(self, idx):
+        if idx < 0:
+            raise IndexError
+        if idx > len(self):
+            self.data.extend([0] * (idx - len(self.data) + 1))
+    def __getitem__(self, idx):
+        self._access(idx)
+        return self.data[idx]
+    def __setitem__(self, idx, val):
+        self._access(idx)
+        self.data[idx] = val
+    def __len__(self):
+        return len(self.data)
+
 def base_intcode(program, in_queue, out_queue):
+    index = 0
+
+    program = UnboundedList(program)
+
     def get_arg(index, pos):
         mode = (program[index] // (10 ** (pos + 1))) % 10
         if mode == 0:
             return program[program[index+pos]]
         elif mode == 1:
             return program[index+pos]
+        else:
+            raise UnknownMode(mode)
 
     try:
-        index = 0
         running = True
         while running:
             op = program[index] % 100
@@ -101,6 +127,9 @@ def base_intcode(program, in_queue, out_queue):
                 raise UnknownOpcode(op)
     except UnknownOpcode as e:
         msg = {"action": "error", "error": "Unknown opcode: " + str(e.opcode)}
+        out_queue.put(msg)
+    except UnknownMode as e:
+        msg = {"action": "error", "error": "Unknown mode: " + str(e.mode)}
         out_queue.put(msg)
     except IndexError:
         msg = {"action": "error", "error": "Index out of bounds"}
