@@ -23,6 +23,7 @@ for line in args.input.readlines():
     y += 1
 
 maximum = 0
+point = None
 for base in asteroids:
     angles = set()
     for target in asteroids:
@@ -44,5 +45,7 @@ for base in asteroids:
             angles.add(angle)
     if maximum < len(angles):
         maximum = len(angles)
+        point = base
 
 print("Maximum: " + str(maximum))
+print("Base: " + str(base))
