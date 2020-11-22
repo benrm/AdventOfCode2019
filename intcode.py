@@ -41,7 +41,8 @@ def base_intcode(program, in_queue, out_queue):
             return program[index+pos]
 
     index = 0
-    while program[index] != 99:
+    running = True
+    while running:
         op = program[index] % 100
         if op in (1, 2, 7, 8):
             arg1 = get_arg(index, 1)
@@ -90,13 +91,11 @@ def base_intcode(program, in_queue, out_queue):
         elif op == 99:
             msg = {"action": "exit"}
             out_queue.put(msg)
-            break
+            running = False
         else:
-            msg = {"action": "error", error: "Unknown opcode"}
+            msg = {"action": "error", "error": "Unknown opcode"}
             out_queue.put(msg)
             break
-    msg = {"action": "exit"}
-    out_queue.put(msg)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Parse optional file inputs")
