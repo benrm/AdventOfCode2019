@@ -1,4 +1,9 @@
+#!/usr/bin/python
+
+import argparse
 import queue
+import string
+import sys
 import threading
 
 def intcode(program):
@@ -92,3 +97,19 @@ def base_intcode(program, in_queue, out_queue):
             break
     msg = {"action": "exit"}
     out_queue.put(msg)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser("Parse optional file inputs")
+    parser.add_argument("-i", "--input", nargs="?", type=argparse.FileType("r"), default=sys.stdin)
+    args = parser.parse_args()
+
+    sep = ','
+    program = [int(s) for s in args.input.read().split(sep)]
+
+    if len(program) < 4:
+        print("Program is too short.")
+        exit(1)
+
+    intcode(program)
+
+    print("[" + sep.join([str(i) for i in program]) + "]")
