@@ -46,7 +46,7 @@ class UnboundedList(list):
     def _access(self, idx):
         if idx < 0:
             raise IndexError
-        if idx > len(self):
+        if idx >= len(self):
             self.data.extend([0] * (idx - len(self.data) + 1))
     def __getitem__(self, idx):
         self._access(idx)
