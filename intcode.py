@@ -59,6 +59,7 @@ class UnboundedList(list):
 
 def base_intcode(program, in_queue, out_queue):
     index = 0
+    rbase = 0
 
     program = UnboundedList(program)
 
@@ -68,6 +69,8 @@ def base_intcode(program, in_queue, out_queue):
             return program[program[index+pos]]
         elif mode == 1:
             return program[index+pos]
+        elif mode == 2:
+            return program[rbase+program[index+pos]]
         else:
             raise UnknownMode(mode)
 
@@ -95,7 +98,7 @@ def base_intcode(program, in_queue, out_queue):
                     else:
                         program[arg3] = 0
                 index += 4
-            elif op == 3 or op ==4:
+            elif op == 3 or op == 4 or op == 9:
                 if op == 3:
                     msg = {"action": "request"}
                     out_queue.put(msg)
@@ -105,6 +108,9 @@ def base_intcode(program, in_queue, out_queue):
                     arg1 = get_arg(index, 1)
                     msg = {"action": "output", "value": arg1}
                     out_queue.put(msg)
+                elif op == 9:
+                    arg1 = get_arg(index, 1)
+                    rbase += arg1
                 index += 2
             elif op == 5 or op == 6:
                 arg1 = get_arg(index, 1)
