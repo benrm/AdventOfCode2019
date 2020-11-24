@@ -88,15 +88,9 @@ def base_intcode(program, in_queue, out_queue):
                 elif op == 2:
                     program[arg3] = arg1 * arg2
                 elif op == 7:
-                    if arg1 < arg2:
-                        program[arg3] = 1
-                    else:
-                        program[arg3] = 0
+                    program[arg3] = int(arg1 < arg2)
                 elif op == 8:
-                    if arg1 == arg2:
-                        program[arg3] = 1
-                    else:
-                        program[arg3] = 0
+                    program[arg3] = int(arg1 == arg2)
                 index += 4
             elif op == 3:
                 arg1 = apply_mode(index, 1, read=False)
