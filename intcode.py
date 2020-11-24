@@ -63,14 +63,14 @@ def base_intcode(program, in_queue, out_queue):
 
     program = UnboundedList(program)
 
-    def get_arg(index, pos):
+    def apply_mode(index, pos, read=True):
         mode = (program[index] // (10 ** (pos + 1))) % 10
         if mode == 0:
-            return program[program[index+pos]]
-        elif mode == 1:
             return program[index+pos]
+        elif mode == 1 and read:
+            return index+pos
         elif mode == 2:
-            return program[rbase+program[index+pos]]
+            return rbase+program[index+pos]
         else:
             raise UnknownMode(mode)
 
@@ -79,9 +79,9 @@ def base_intcode(program, in_queue, out_queue):
         while running:
             op = program[index] % 100
             if op in (1, 2, 7, 8):
-                arg1 = get_arg(index, 1)
-                arg2 = get_arg(index, 2)
-                arg3 = program[index+3]
+                arg1 = program[apply_mode(index, 1)]
+                arg2 = program[apply_mode(index, 2)]
+                arg3 = apply_mode(index, 3, read=False)
 
                 if op == 1:
                     program[arg3] = int(arg1) + int(arg2)
@@ -98,23 +98,24 @@ def base_intcode(program, in_queue, out_queue):
                     else:
                         program[arg3] = 0
                 index += 4
-            elif op == 3 or op == 4 or op == 9:
-                if op == 3:
-                    msg = {"action": "request"}
-                    out_queue.put(msg)
-                    obj = in_queue.get()
-                    program[program[index+1]] = obj["value"]
-                elif op == 4:
-                    arg1 = get_arg(index, 1)
-                    msg = {"action": "output", "value": arg1}
+            elif op == 3:
+                arg1 = apply_mode(index, 1, read=False)
+                msg = {"action": "request"}
+                out_queue.put(msg)
+                obj = in_queue.get()
+                program[arg1] = obj["value"]
+                index += 2
+            elif op == 4 or op == 9:
+                arg1 = apply_mode(index, 1)
+                if op == 4:
+                    msg = {"action": "output", "value": program[arg1]}
                     out_queue.put(msg)
                 elif op == 9:
-                    arg1 = get_arg(index, 1)
-                    rbase += arg1
+                    rbase += program[arg1]
                 index += 2
             elif op == 5 or op == 6:
-                arg1 = get_arg(index, 1)
-                arg2 = get_arg(index, 2)
+                arg1 = program[apply_mode(index, 1)]
+                arg2 = program[apply_mode(index, 2)]
                 if op == 5:
                     if arg1 != 0:
                         index = arg2
