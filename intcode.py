@@ -97,7 +97,7 @@ def base_intcode(program, in_queue, out_queue):
                 msg = {"action": "request"}
                 out_queue.put(msg)
                 obj = in_queue.get()
-                program[arg1] = obj["value"]
+                program[arg1] = int(obj["value"])
                 index += 2
             elif op == 4 or op == 9:
                 arg1 = apply_mode(index, 1)
